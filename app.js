@@ -45,14 +45,17 @@ const metricFields = [
   { key: "saves", label: "Saves" },
 ];
 const checklistFields = [
-  { key: "hook_first", label: "Hook lands inside 2 seconds", detail: "Open on the strongest face, voice, or crowd beat." },
+  { key: "hook_first", label: "Hook lands inside 2 seconds", detail: "Open on the strongest face, voice, or crowd beat. Bold on-screen text in frame one — the cold-start test decides in seconds." },
+  { key: "send_worthy", label: "Engineered for DM sends", detail: "Sends per reach is the #1 non-follower signal. Make it 'send this to your rave crew' worthy." },
   { key: "face_forward", label: "Aaron is face-forward", detail: "Use Aaron's face or voice where the footage supports it." },
   { key: "welcoming_energy", label: "Crowd reads fun + welcoming", detail: "Favor connection and real room energy." },
-  { key: "burned_captions", label: "Talking is captioned", detail: "Burn in captions for every spoken or hype moment." },
+  { key: "burned_captions", label: "Talking is captioned", detail: "Burn in captions for every spoken or hype moment. IG's AI reads on-screen text for topic matching." },
   { key: "vertical_format", label: "9:16 vertical", detail: "Frame for Reels without hiding the action." },
-  { key: "duration_target", label: "15–30 second cut", detail: "Keep only the beats that earn their time." },
-  { key: "minimal_text", label: "Minimal early overlays", detail: "Never cover faces, decks, or the drop." },
-  { key: "original_audio", label: "Original show audio", detail: "Normalize it; no random trending-audio swap." },
+  { key: "duration_target", label: "7–30s discovery cut (3 min max)", detail: "Only ≤3 min reels reach non-followers. Keep only beats that earn their time; design loops for rewatches." },
+  { key: "minimal_text", label: "Minimal early overlays", detail: "Never cover faces, decks, or the drop. No engagement-bait text ('comment YES', 'tag 3 friends')." },
+  { key: "original_audio", label: "Original show audio", detail: "Normalize it; no random trending-audio swap. Original audio is safest for originality scoring." },
+  { key: "original_only", label: "100% original footage", detail: "No reposts, no cross-platform watermarks. Majority-unoriginal accounts lose ALL recommendation surfaces." },
+  { key: "keyword_caption", label: "Keyword caption + 3–5 tags", detail: "'[DJ] live at [venue], Nashville — [genre]'. Captions are indexed for search; hashtags categorize, keywords rank." },
   { key: "original_quality", label: "Original resolution + bitrate", detail: "Never upscale or inflate the source." },
   { key: "h264_profile", label: "H.264 high / yuv420p", detail: "Instagram-safe delivery profile." },
   { key: "single_encode", label: "Single encode from source", detail: "Avoid generational quality loss." },
@@ -475,20 +478,20 @@ function conceptCardHTML(c) {
   ).join("");
   const openDetails = d.status === "uploaded" || d.status === "ready_for_review" || d.status === "approved";
   return `<article class="concept-card status-${d.status}" data-concept="${c.id}">
-    <header class="concept-head"><div><span class="status-chip">${statusLabels[d.status]}</span><p>${esc(d.event_name)} · ${esc(d.clip_name)}</p><h3>${esc(d.name)}</h3></div><strong>${checked}<small>/12</small></strong></header>
+    <header class="concept-head"><div><span class="status-chip">${statusLabels[d.status]}</span><p>${esc(d.event_name)} · ${esc(d.clip_name)}</p><h3>${esc(d.name)}</h3></div><strong>${checked}<small>/${checklistFields.length}</small></strong></header>
     <div class="concept-pitch"><span>HOOK</span><p>${esc(d.hook_description) || "Hook description not added yet."}</p></div>
     <dl class="concept-brief"><div><dt>Cut plan</dt><dd>${esc(d.cut_plan) || "Add timestamps after reviewing the source."}</dd></div><div><dt>Caption angle</dt><dd>${esc(d.caption_angle) || "Add the story angle for this concept."}</dd></div></dl>
     ${(d.status === "ready_for_review" || d.status === "approved") ? `<div class="finished-draft"><p class="kicker">Publishing package</p><strong>${esc(d.caption_draft) || "Caption draft still needed."}</strong><span>${esc(d.hashtags_draft) || "Hashtags still needed."}</span></div>` : ""}
     <details class="production-details"${openDetails ? " open" : ""}>
-      <summary>Edit plan &amp; checklist <span>${checked}/12 ready</span></summary>
+      <summary>Edit plan &amp; checklist <span>${checked}/${checklistFields.length} ready</span></summary>
       <div class="concept-fields">
         <label class="field"><span>Concept name</span><input data-c-f="${c.id}" data-k="name" value="${esc(d.name)}"></label>
         <label class="field"><span>Hook description</span><textarea rows="2" data-c-f="${c.id}" data-k="hook_description">${esc(d.hook_description)}</textarea></label>
         <label class="field"><span>Cut plan</span><textarea rows="3" data-c-f="${c.id}" data-k="cut_plan">${esc(d.cut_plan)}</textarea></label>
         <label class="field"><span>Caption angle</span><input data-c-f="${c.id}" data-k="caption_angle" value="${esc(d.caption_angle)}"></label>
         <div class="checklist-grid">${checks}</div>
-        <label class="field"><span>Caption draft</span><small>Lead with the hook on line one.</small><textarea rows="5" data-c-f="${c.id}" data-k="caption_draft" placeholder="Hook-first caption…">${esc(d.caption_draft)}</textarea></label>
-        <label class="field"><span>Hashtag draft</span><small>Keep Nashville EDM / EDM and Nashville location tags relevant.</small><input data-c-f="${c.id}" data-k="hashtags_draft" value="${esc(d.hashtags_draft)}" placeholder="#nashvilleedm #edm #nashville"></label>
+        <label class="field"><span>Caption draft</span><small>Keyword-rich first line: "[DJ] live at [venue], Nashville — [genre]". Match on-screen text.</small><textarea rows="5" data-c-f="${c.id}" data-k="caption_draft" placeholder="Hook-first caption…">${esc(d.caption_draft)}</textarea></label>
+        <label class="field"><span>Hashtag draft</span><small>3–5 niche tags. Hashtags categorize — keywords in the caption do the ranking.</small><input data-c-f="${c.id}" data-k="hashtags_draft" value="${esc(d.hashtags_draft)}" placeholder="#nashvilleedm #edm #nashville"></label>
         <div class="detail-actions"><button class="secondary-button" type="button" data-act="save-concept" data-id="${c.id}">Save details</button>${confirmDeleteConcept === c.id ? `<span class="inline-confirm">Delete it? <button type="button" data-act="cancel-del-concept" data-id="${c.id}">Cancel</button><button type="button" data-act="do-del-concept" data-id="${c.id}">Yes, delete</button></span>` : `<button class="delete-link" type="button" data-act="ask-del-concept" data-id="${c.id}">Delete concept</button>`}</div>
       </div>
     </details>
